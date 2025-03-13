@@ -111,17 +111,29 @@ document.addEventListener('DOMContentLoaded', function() {
             // Obter o parâmetro fbclid da URL
             const fbclid = getUrlParameter('fbclid');
             
+            // Obter parâmetros adicionais da URL
+            const utm_source = getUrlParameter('utm_source');
+            const utm_medium = getUrlParameter('utm_medium');
+            const utm_campaign = getUrlParameter('utm_campaign');
+            const utm_content = getUrlParameter('utm_content');
+            const lp = getUrlParameter('lp');
+            
             // Dados para enviar ao n8n
             const data = {
                 expert: 'pablinaviator',
-                fbclid: fbclid
+                fbclid: fbclid,
+                utm_source: utm_source,
+                utm_medium: utm_medium,
+                utm_campaign: utm_campaign,
+                utm_content: utm_content,
+                lp: lp
             };
             
             // Endpoint do n8n
             const n8nEndpoint = 'https://whkn8n.meumenu2023.uk/webhook/fbclid-landingpage';
             
-            // Enviar dados para o n8n via POST apenas se houver fbclid
-            if (fbclid) {
+            // Enviar dados para o n8n via POST se houver fbclid ou outros parâmetros relevantes
+            if (fbclid || utm_source || utm_medium || utm_campaign || utm_content || lp) {
                 fetch(n8nEndpoint, {
                     method: 'POST',
                     headers: {
