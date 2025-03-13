@@ -113,9 +113,13 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Dados para enviar ao n8n
             const data = {
-                expert: 'pablinaviator',
-                ...params
+                expert: 'pablinaviator'
             };
+            
+            // Adicionar todos os parâmetros da URL ao objeto data
+            Object.keys(params).forEach(key => {
+                data[key] = params[key];
+            });
             
             console.log('Dados para enviar ao n8n:', data);
             
@@ -124,12 +128,16 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Enviar dados para o n8n via POST se houver parâmetros relevantes
             if (Object.keys(params).length > 0) {
+                // Converter para string JSON e registrar no console para depuração
+                const jsonData = JSON.stringify(data);
+                console.log('JSON a ser enviado:', jsonData);
+                
                 fetch(n8nEndpoint, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'text/plain;charset=UTF-8',
                     },
-                    body: JSON.stringify(data),
+                    body: jsonData,
                     mode: 'no-cors'
                 })
                 .then(response => {
@@ -182,19 +190,42 @@ document.addEventListener('DOMContentLoaded', function() {
 // Função para obter todos os parâmetros da URL de uma vez
 function getAllUrlParameters() {
     const params = {};
-    const queryString = location.search.substring(1);
+    
+    // Obter a string de consulta da URL
+    const queryString = window.location.search.substring(1);
+    
+    // Log para depuração
+    console.log('Query string completa:', queryString);
     
     if (queryString) {
+        // Dividir a string de consulta em pares de chave=valor
         const pairs = queryString.split('&');
+        
+        // Log para depuração
+        console.log('Número de parâmetros encontrados:', pairs.length);
+        
+        // Processar cada par
         for (let i = 0; i < pairs.length; i++) {
+            // Dividir o par em chave e valor
             const pair = pairs[i].split('=');
+            
+            // Decodificar a chave
             const key = decodeURIComponent(pair[0]);
+            
+            // Decodificar o valor (se existir)
             const value = pair.length > 1 ? decodeURIComponent(pair[1].replace(/\+/g, ' ')) : '';
+            
+            // Adicionar ao objeto de parâmetros
             params[key] = value;
+            
+            // Log para depuração
+            console.log(`Parâmetro capturado: ${key} = ${value}`);
         }
     }
     
-    console.log('Parâmetros da URL:', params);
+    // Log final com todos os parâmetros
+    console.log('Todos os parâmetros capturados:', params);
+    
     return params;
 }
 
