@@ -121,12 +121,12 @@ document.addEventListener('DOMContentLoaded', function() {
             // Dados para enviar ao n8n
             const data = {
                 expert: 'pablinaviator',
-                fbclid: fbclid,
-                utm_source: utm_source,
-                utm_medium: utm_medium,
-                utm_campaign: utm_campaign,
-                utm_content: utm_content,
-                lp: lp
+                fbclid: fbclid || '',
+                utm_source: utm_source || '',
+                utm_medium: utm_medium || '',
+                utm_campaign: utm_campaign || '',
+                utm_content: utm_content || '',
+                lp: lp || ''
             };
             
             // Endpoint do n8n
@@ -134,10 +134,13 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Enviar dados para o n8n via POST se houver fbclid ou outros parâmetros relevantes
             if (fbclid || utm_source || utm_medium || utm_campaign || utm_content || lp) {
+                // Registrar os dados que estão sendo enviados para depuração
+                console.log('Enviando dados para n8n:', data);
+                
                 fetch(n8nEndpoint, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'text/plain;charset=UTF-8',
                     },
                     body: JSON.stringify(data),
                     mode: 'no-cors'
