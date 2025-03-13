@@ -108,35 +108,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
             
-            // Obter o parâmetro fbclid da URL
-            const fbclid = getUrlParameter('fbclid');
-            
-            // Obter parâmetros adicionais da URL
-            const utm_source = getUrlParameter('utm_source');
-            const utm_medium = getUrlParameter('utm_medium');
-            const utm_campaign = getUrlParameter('utm_campaign');
-            const utm_content = getUrlParameter('utm_content');
-            const lp = getUrlParameter('lp');
+            // Obter todos os parâmetros da URL de uma vez
+            const params = getAllUrlParameters();
             
             // Dados para enviar ao n8n
             const data = {
                 expert: 'pablinaviator',
-                fbclid: fbclid || '',
-                utm_source: utm_source || '',
-                utm_medium: utm_medium || '',
-                utm_campaign: utm_campaign || '',
-                utm_content: utm_content || '',
-                lp: lp || ''
+                ...params
             };
+            
+            console.log('Dados para enviar ao n8n:', data);
             
             // Endpoint do n8n
             const n8nEndpoint = 'https://whkn8n.meumenu2023.uk/webhook/fbclid-landingpage';
             
-            // Enviar dados para o n8n via POST se houver fbclid ou outros parâmetros relevantes
-            if (fbclid || utm_source || utm_medium || utm_campaign || utm_content || lp) {
-                // Registrar os dados que estão sendo enviados para depuração
-                console.log('Enviando dados para n8n:', data);
-                
+            // Enviar dados para o n8n via POST se houver parâmetros relevantes
+            if (Object.keys(params).length > 0) {
                 fetch(n8nEndpoint, {
                     method: 'POST',
                     headers: {
@@ -154,7 +141,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     window.location.href = telegramUrl;
                 });
             } else {
-                // Se não houver fbclid, apenas redirecionar para o Telegram
+                // Se não houver parâmetros, apenas redirecionar para o Telegram
                 window.location.href = telegramUrl;
             }
         });
@@ -192,12 +179,23 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Função para obter parâmetros da URL
-function getUrlParameter(name) {
-    name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-    const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-    const results = regex.exec(location.search);
-    return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+// Função para obter todos os parâmetros da URL de uma vez
+function getAllUrlParameters() {
+    const params = {};
+    const queryString = location.search.substring(1);
+    
+    if (queryString) {
+        const pairs = queryString.split('&');
+        for (let i = 0; i < pairs.length; i++) {
+            const pair = pairs[i].split('=');
+            const key = decodeURIComponent(pair[0]);
+            const value = pair.length > 1 ? decodeURIComponent(pair[1].replace(/\+/g, ' ')) : '';
+            params[key] = value;
+        }
+    }
+    
+    console.log('Parâmetros da URL:', params);
+    return params;
 }
 
 // Create particle effect
