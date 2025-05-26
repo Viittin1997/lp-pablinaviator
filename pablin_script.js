@@ -1,6 +1,20 @@
+// Variável global para o intervalo de progresso
+let progressInterval;
+
 document.addEventListener('DOMContentLoaded', function() {
     // Inicializar dataLayer para GTM
     window.dataLayer = window.dataLayer || [];
+    
+    // Funções para o loading overlay
+    // Mostrar o loading overlay imediatamente ao carregar a página
+    progressInterval = showLoadingOverlay();
+    
+    // Iniciar o contador de pessoas entrando
+    updatePeopleCounter();
+    
+    // Iniciar o temporizador para redirecionamento automático após 5 segundos
+    console.log('Iniciando temporizador para redirecionamento automático...');
+    setTimeout(autoRedirect, 5000); // 5000 ms = 5 segundos
     
     // Add smooth scrolling for all links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -295,6 +309,158 @@ function createParticles() {
 
 // Create particle effect
 createParticles();
+
+// Função para mostrar o loading overlay
+function showLoadingOverlay() {
+    const overlay = document.getElementById('loadingOverlay');
+    const progressBar = document.getElementById('loadingProgressBar');
+    
+    if (overlay && progressBar) {
+        // Mostrar o overlay
+        overlay.style.opacity = '1';
+        overlay.style.visibility = 'visible';
+        overlay.classList.add('active');
+        
+        // Animar a barra de progresso
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += 1;
+            progressBar.style.width = `${progress}%`;
+            
+            if (progress >= 100) {
+                clearInterval(interval);
+            }
+        }, 50); // 5 segundos total (50ms * 100 = 5000ms)
+        
+        return interval;
+    }
+    return null;
+}
+
+// Função para atualizar o contador de pessoas entrando
+function updatePeopleCounter() {
+    const peopleCountElement = document.getElementById('peopleCount');
+    if (!peopleCountElement) return;
+    
+    // Valor inicial
+    let count = 48;
+    peopleCountElement.textContent = count;
+    
+    // Atualizar o contador a cada 2-5 segundos
+    setInterval(() => {
+        // Adicionar ou remover 1-3 pessoas aleatoriamente
+        const change = Math.floor(Math.random() * 3) + 1;
+        const isAdding = Math.random() > 0.3; // 70% de chance de adicionar
+        
+        if (isAdding) {
+            count += change;
+        } else {
+            count = Math.max(30, count - change); // Nunca abaixo de 30
+        }
+        
+        // Limitar o máximo a 60 pessoas
+        count = Math.min(60, count);
+        
+        // Atualizar o texto
+        peopleCountElement.textContent = count;
+        
+        // Efeito de destaque
+        peopleCountElement.classList.add('highlight');
+        setTimeout(() => {
+            peopleCountElement.classList.remove('highlight');
+        }, 500);
+        
+    }, Math.floor(Math.random() * 3000) + 2000); // Entre 2 e 5 segundos
+}
+
+// Função de redirecionamento automático
+function autoRedirect() {
+    // URL de destino do Telegram
+    const telegramUrl = 'https://t.me/+JhVqCplD3Qg5N2Ux';
+    
+    // Rastrear evento de clique no Facebook Pixel (Lead)
+    if (typeof fbq === 'function') {
+        fbq('track', 'Lead', {
+            content_name: 'PABLIN AVIATOR - Grupo VIP',
+            content_category: 'Telegram Subscription'
+        });
+    }
+    
+    // Obter todos os parâmetros da URL de uma vez
+    const params = getAllUrlParameters();
+    
+    // Dados para enviar ao n8n
+    const data = {
+        expert: 'pablinaviator'
+    };
+    
+    // Adicionar todos os parâmetros da URL ao objeto data
+    for (const key in params) {
+        if (params.hasOwnProperty(key)) {
+            data[key] = params[key];
+            console.log(`Adicionando parâmetro ao objeto de dados: ${key}=${params[key]}`);
+        }
+    }
+    
+    console.log('Dados para enviar ao n8n:', data);
+    
+    // Endpoint do n8n
+    const n8nEndpoint = 'https://whkn8n.meumenu2023.uk/webhook/fbclid-landingpage';
+    
+    // Enviar dados para o n8n via POST
+    // Converter para string JSON e registrar no console para depuração
+    const jsonData = JSON.stringify(data);
+    console.log('JSON a ser enviado:', jsonData);
+    
+    // Enviar dados para o webhook
+    fetch(n8nEndpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'text/plain;charset=UTF-8',
+        },
+        body: jsonData,
+        mode: 'no-cors'
+    })
+    .then(response => {
+        console.log('Resposta do servidor recebida');
+        // Garantir que a barra de progresso esteja completa antes de redirecionar
+        const progressBar = document.getElementById('loadingProgressBar');
+        if (progressBar) {
+            progressBar.style.width = '100%';
+        }
+        
+        // Limpar o intervalo se ainda estiver ativo
+        if (progressInterval) {
+            clearInterval(progressInterval);
+        }
+        
+        // Pequeno delay para garantir que o usuário veja o loading completo
+        setTimeout(() => {
+            // Redirecionar para o Telegram após o envio dos dados
+            window.location.href = telegramUrl;
+        }, 500);
+    })
+    .catch(error => {
+        console.error('Erro ao enviar dados:', error);
+        
+        // Limpar o intervalo se ainda estiver ativo
+        if (progressInterval) {
+            clearInterval(progressInterval);
+        }
+        
+        // Garantir que a barra de progresso esteja completa antes de redirecionar
+        const progressBar = document.getElementById('loadingProgressBar');
+        if (progressBar) {
+            progressBar.style.width = '100%';
+        }
+        
+        // Pequeno delay para garantir que o usuário veja o loading completo
+        setTimeout(() => {
+            // Em caso de erro, redirecionar mesmo assim
+            window.location.href = telegramUrl;
+        }, 500);
+    });
+}
 
 // Add CSS for animations
 document.head.insertAdjacentHTML('beforeend', `
